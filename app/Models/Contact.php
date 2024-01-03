@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Contact extends Model
 {
@@ -21,5 +22,15 @@ class Contact extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(Contact::class, 'user_id', 'id');
+    }
+
+    /**
+     * Get all of the adresses for the Contact
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function adresses(): HasMany
+    {
+        return $this->hasMany(Address::class, 'contact_id', 'id');
     }
 }

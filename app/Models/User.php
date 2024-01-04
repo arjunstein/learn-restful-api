@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class User extends Model
 {
     protected $table = "users";
+    protected $guarded = [];
     protected $primaryKey = "id";
     protected $keyType = "int";
     public $timestamps = true;

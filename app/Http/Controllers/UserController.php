@@ -2,14 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Http\Requests\UserLoginRequest;
 use App\Http\Requests\UserRegisterRequest;
-use App\Models\User;
+use App\Http\Requests\UserUpdateRequest;
 use App\Http\Resources\UserResource;
-use Illuminate\Http\JsonResponse;
+use App\Models\User;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
@@ -22,8 +26,8 @@ class UserController extends Controller
             throw new HttpResponseException(
                 response(
                     [
-                        "errors" => [
-                            "username" => 'Username sudah terdaftar',
+                        'errors' => [
+                            'username' => 'Username sudah terdaftar',
                         ],
                     ],
                     400,
@@ -36,6 +40,30 @@ class UserController extends Controller
         $user->save();
 
         return (new UserResource($user))->response()->setStatusCode(201);
+    }
+
+    public function login(UserLoginRequest $request): UserResource
+    {
+        $data = $request->validated();
+
+        $user = User::where('username', $data['username'])->first();
+        if (!$user || !Hash::check($data['password'], $user->password)) {
+            throw new HttpResponseException(
+                response(
+                    [
+                        'errors' => [
+                            'message' => 'Invalid username or password',
+                        ],
+                    ],
+                    401,
+                ),
+            );
+        }
+        // Generate token
+        $user->token = Str::uuid()->toString();
+        $user->save();
+
+        return new UserResource($user);
     }
 
     /**
